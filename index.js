@@ -21,8 +21,18 @@ async function run() {
 
         app.get('/car/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: ObjectId(id)}
+            const query = { _id: ObjectId(id) }
             const result = await inventoryCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.put('/car/:id', async (req, res) => {
+            const id = req.params.id
+            const updatedData = req.body
+            const filter = { _id: ObjectId(id) }
+            const updatedDoc = { $set: updatedData }
+            const options = { upsert: true }
+            const result = await inventoryCollection.updateOne(filter, updatedDoc, options)
             res.send(result)
         })
     } finally {
