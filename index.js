@@ -26,6 +26,12 @@ async function run() {
             res.send(result)
         })
 
+        app.post('/car', async (req, res) => {
+            const item = req.body
+            const result = await inventoryCollection.insertOne(item)
+            res.send(result)
+        })
+
         app.put('/car/:id', async (req, res) => {
             const id = req.params.id
             const updatedData = req.body
