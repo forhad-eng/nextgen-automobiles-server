@@ -29,6 +29,13 @@ async function run() {
             res.send(result)
         })
 
+        app.delete('/sell/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const result = await soldCollection.deleteOne(query)
+            res.send(result)
+        })
+
         //Inventory APIs
         app.get('/car', async (req, res) => {
             const cursor = inventoryCollection.find({})
