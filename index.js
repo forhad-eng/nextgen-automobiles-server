@@ -15,6 +15,14 @@ async function run() {
         const soldCollection = client.db('carInventory').collection('sold')
 
         //sold car APIs
+        app.get('/sell', async (req, res) => {
+            const email = req.query.email
+            const query = { email }
+            const cursor = soldCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
         app.post('/sell', async (req, res) => {
             const soldItem = req.body
             const result = await soldCollection.insertOne(soldItem)
