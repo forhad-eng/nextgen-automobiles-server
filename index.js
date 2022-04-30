@@ -12,7 +12,16 @@ async function run() {
     try {
         await client.connect()
         const inventoryCollection = client.db('carInventory').collection('car')
+        const soldCollection = client.db('carInventory').collection('sold')
 
+        //sold car APIs
+        app.post('/sell', async (req, res) => {
+            const soldItem = req.body
+            const result = await soldCollection.insertOne(soldItem)
+            res.send(result)
+        })
+
+        //Inventory APIs
         app.get('/car', async (req, res) => {
             const cursor = inventoryCollection.find({})
             const cars = await cursor.toArray()
