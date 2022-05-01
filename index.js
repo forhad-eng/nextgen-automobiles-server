@@ -6,6 +6,24 @@ require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
 
+app.use(cors())
+app.use(express.json())
+
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+    const accessToken = authHeader.split(' ')[1]
+    jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden access' })
+        }
+        req.decoded = decoded
+        next()
+    })
+}
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.9bqnm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 })
 
@@ -23,12 +41,15 @@ async function run() {
         })
 
         //sold car APIs
-        app.get('/sell', async (req, res) => {
+        app.get('/sell', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email
             const email = req.query.email
-            const query = { email }
-            const cursor = soldCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result)
+            if (email === decodedEmail) {
+                const query = { email }
+                const cursor = soldCollection.find(query)
+                const result = await cursor.toArray()
+                res.send(result)
+            }
         })
 
         app.post('/sell', async (req, res) => {
@@ -85,9 +106,6 @@ async function run() {
 }
 
 run().catch(console.dir)
-
-app.use(cors())
-app.use(express.json())
 
 app.get('/', (req, res) => {
     res.send('Server is running')
