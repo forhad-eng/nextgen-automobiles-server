@@ -35,6 +35,28 @@ async function run() {
         const userCollection = client.db('carInventory').collection('user')
 
         //Users
+        app.get('/user', async (req, res) => {
+            const result = await userCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.get('/user/admin/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email
+            const user = await userCollection.findOne({ email })
+            const isAdmin = user.role === 'admin'
+            res.send({ admin: isAdmin })
+        })
+
+        app.patch('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email
+            const filter = { email }
+            const updatedDoc = { $set: { role: 'admin' } }
+            const result = await userCollection.updateOne(filter, updatedDoc)
+            if (result.modifiedCount) {
+                res.send({ success: true, message: 'Make admin success' })
+            }
+        })
+
         app.put('/user', async (req, res) => {
             const user = req.body
             const email = user.email
