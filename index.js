@@ -32,11 +32,17 @@ async function run() {
         await client.connect()
         const inventoryCollection = client.db('carInventory').collection('car')
         const soldCollection = client.db('carInventory').collection('sold')
+        const userCollection = client.db('carInventory').collection('user')
 
-        //AUTH
-        app.post('/login', (req, res) => {
-            const email = req.body
-            const accessToken = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' })
+        //Users
+        app.put('/user', async (req, res) => {
+            const user = req.body
+            const email = user.email
+            const filter = { email }
+            const options = { upsert: true }
+            const updatedDoc = { $set: user }
+            const accessToken = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' })
+            await userCollection.updateOne(filter, updatedDoc, options)
             res.send({ accessToken })
         })
 
