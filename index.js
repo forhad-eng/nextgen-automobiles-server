@@ -31,7 +31,7 @@ async function run() {
     try {
         await client.connect()
         const inventoryCollection = client.db('carInventory').collection('car')
-        const soldCollection = client.db('carInventory').collection('sold')
+        const orderCollection = client.db('carInventory').collection('sold')
         const userCollection = client.db('carInventory').collection('user')
 
         //Users
@@ -72,24 +72,26 @@ async function run() {
         app.get('/sell', verifyJWT, async (req, res) => {
             const decodedEmail = req.decoded.email
             const email = req.query.email
-            if (email === decodedEmail) {
-                const query = { email }
-                const cursor = soldCollection.find(query)
-                const result = await cursor.toArray()
-                res.send(result)
+            if (email) {
+                if (email === decodedEmail) {
+                    const result = await orderCollection.find({ email }).toArray()
+                    return res.send(result)
+                }
             }
+            const result = await orderCollection.find().toArray()
+            return res.send(result)
         })
 
         app.post('/sell', async (req, res) => {
             const soldItem = req.body
-            const result = await soldCollection.insertOne(soldItem)
+            const result = await orderCollection.insertOne(soldItem)
             res.send(result)
         })
 
         app.delete('/sell/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: ObjectId(id) }
-            const result = await soldCollection.deleteOne(query)
+            const result = await orderCollection.deleteOne(query)
             res.send(result)
         })
 
