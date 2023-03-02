@@ -96,9 +96,9 @@ async function run() {
         })
 
         //Inventory APIs
-        app.get('/cars', async (req, res) => {
-            const cursor = inventoryCollection.find({})
-            const cars = await cursor.toArray()
+        app.get('/car', async (req, res) => {
+            const cursor = await inventoryCollection.find({})
+            const cars = cursor.toArray()
             res.send(cars)
         })
 
